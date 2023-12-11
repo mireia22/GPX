@@ -1,39 +1,40 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import { Icon } from "leaflet";
-const markers = [
-  {
-    geocode: [42.2032, 1.34],
-    popUp: "Figols",
-    // popUp: ["Start", "Finish"],
-  },
-  {
-    geocode: [42.1732, 1.31651],
-    popUp: "Coll de Nargó",
-
-    // popUp: ["Start", "Finish"],
-  },
-];
+import { MapContainer, TileLayer, Polyline } from "react-leaflet";
+import gpxParser from "gpxparser";
 
 const App = () => {
-  const [trackData, setTrackData] = useState(null);
+  const [trackPoints, setTrackPoints] = useState(null);
+
+  useEffect(() => {
+    fetch("https://raw.githubusercontent.com/mireia22/GPX/main/gpx/1085063.gpx")
+      .then((res) => res.text())
+      .then((gpxData) => {
+        const gpx = new gpxParser();
+        gpx.parse(gpxData);
+        setTrackPoints(gpx.tracks[0].points);
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   return (
     <div>
-      <MapContainer center={[42.2167, 1.3333]} zoom={13}>
+      <MapContainer
+        center={[42.2167, 1.3333]}
+        zoom={13}
+        style={{ height: "500px" }}
+      >
         <TileLayer
           attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {/* <TileLayer
-          attribution="Steam WaterColor"
-          url="https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg"
-        /> */}
-
-        {markers.map((marker) => (
-          <Marker position={marker.geocode}></Marker>
-        ))}
+        {trackPoints && (
+          <Polyline
+            positions={trackPoints.map((point) => [point.lat, point.lon])}
+            color="red"
+            weight={3}
+          />
+        )}
       </MapContainer>
     </div>
   );
