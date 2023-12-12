@@ -11,18 +11,33 @@ const getAllTracks = async (req, res, next) => {
 
 const postTrack = async (req, res, next) => {
   try {
-    const { name, gpxFile } = req.body;
+    const { points, totalDistance, elevation } = req.body;
+    console.log("Received points:", { points, totalDistance, elevation });
 
     const newTrack = new Track({
-      name,
-      gpxFile,
+      points,
+      totalDistance,
+      elevation,
     });
-    const savedTrack = newTrack.save();
+    const savedTrack = await newTrack.save();
+    console.log("Track saved", savedTrack);
 
     return res.status(201).json({ message: "posted", savedTrack });
   } catch (error) {
+    console.error("Error in postTrack:", error);
     res.status(500).json(error);
   }
 };
 
-module.exports = { postTrack, getAllTracks };
+const deleteAllTracks = async (req, res, next) => {
+  try {
+    const result = await Track.deleteMany({});
+    console.log(`${result.deletedCount} tracks deleted`);
+    return res.status(200).json({ message: "All tracks deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteAllTracks:", error);
+    res.status(500).json(error);
+  }
+};
+
+module.exports = { postTrack, getAllTracks, deleteAllTracks };

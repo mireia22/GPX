@@ -1,41 +1,40 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Polyline } from "react-leaflet";
-import gpxParser from "gpxparser";
+import Map from "./components/Map";
+import FileInput from "./components/FileInput";
+import { GpxData } from "./types/Type";
 
 const App = () => {
-  const [trackPoints, setTrackPoints] = useState(null);
+  const [gpxData, setGpxData] = useState<GpxData>({
+    points: [],
+    totalDistance: null,
+    elevation: {
+      min: null,
+      max: null,
+      avg: null,
+    },
+  });
+  console.log("gpxData:", gpxData);
 
-  useEffect(() => {
-    fetch("https://raw.githubusercontent.com/mireia22/GPX/main/gpx/1085063.gpx")
-      .then((res) => res.text())
-      .then((gpxData) => {
-        const gpx = new gpxParser();
-        gpx.parse(gpxData);
-        setTrackPoints(gpx.tracks[0].points);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+  const { points, elevation, totalDistance } = gpxData;
+
+  const toKM = (m: number | null) => m && (m / 1000).toFixed(2);
 
   return (
     <div>
-      <MapContainer
-        center={[42.2167, 1.3333]}
-        zoom={13}
-        style={{ height: "500px" }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {trackPoints && (
-          <Polyline
-            positions={trackPoints.map((point) => [point.lat, point.lon])}
-            color="red"
-            weight={3}
-          />
-        )}
-      </MapContainer>
+      <header className="h-2 w-full p-2">TRACKER</header>
+      <div className="flex justify-between">
+        <Map points={points} />
+        <aside className="flex flex-col bg-slate-600 text-white gap-4 p-2">
+          <p>TOTAL DISTANCE: {toKM(totalDistance)} km</p>
+          <p>MAX ELEVATION: {elevation.max} m</p>
+          <p>MIN ELEVATION: {elevation.min} m</p>
+          <p className="text-green-500">
+            AVG ELEVATION: {elevation.avg?.toFixed(2)} m
+          </p>
+          <FileInput setGpxData={setGpxData} />
+        </aside>
+      </div>
     </div>
   );
 };

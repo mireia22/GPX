@@ -1,17 +1,34 @@
 const mongoose = require("mongoose");
 
 const trackSchema = new mongoose.Schema({
-  name: String,
-  gpxFile: String,
-  coordinates: [
+  points: [
     {
-      lat: Number,
-      lon: Number,
-      ele: Number,
+      lat: {
+        type: Number,
+        required: true,
+      },
+      lon: {
+        type: Number,
+        required: true,
+      },
     },
   ],
+  totalDistance: {
+    type: Number,
+  },
+  elevation: {
+    min: {
+      type: Number,
+    },
+    max: {
+      type: Number,
+    },
+    avg: {
+      type: Number,
+    },
+  },
 });
 
-const Track = mongoose.model("Track", trackSchema);
+const Track = mongoose.model("track", trackSchema, "track");
 
 module.exports = Track;

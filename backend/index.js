@@ -1,15 +1,16 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors"); // Import the cors middleware
 const { connectToDB } = require("./src/config/db");
 const { trackRouter } = require("./src/api/routes/track-route");
-const { parseGpx } = require("./src/utils/parseGpx");
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 dotenv.config();
 
+app.use(cors());
+
 app.use("/api/v1", trackRouter);
-parseGpx();
 
 app.use("*", (req, res, next) => {
   res.send("Route Not Found");
