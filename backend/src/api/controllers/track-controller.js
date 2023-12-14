@@ -9,6 +9,16 @@ const getAllTracks = async (req, res, next) => {
   }
 };
 
+const getTrackById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const track = await Track.findById(id);
+    return res.status(200).json(track);
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+};
+
 const postTrack = async (req, res, next) => {
   try {
     const { points, totalDistance, elevation } = req.body;
@@ -40,4 +50,4 @@ const deleteAllTracks = async (req, res, next) => {
   }
 };
 
-module.exports = { postTrack, getAllTracks, deleteAllTracks };
+module.exports = { postTrack, getAllTracks, deleteAllTracks, getTrackById };
